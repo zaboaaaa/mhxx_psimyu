@@ -379,8 +379,11 @@ function nesetSet(data, job) {
 function findMultPiece(data, part, sex, job) {
   for (const set of data.armor) {
     if (set.sex !== 'b' && set.sex !== sex) continue;
-    if (set.role && set.role !== 'b' && set.role !== job) continue;
-    for (const [p, name, , skills] of set.pieces) if (p === part && skills[MULT] > 0) return name;
+    for (const [p, name, , skills] of set.pieces) {
+      if (p !== part || !(skills[MULT] > 0)) continue;
+      if (part !== 0 && set.role && set.role !== 'b' && set.role !== job) continue;
+      return name;
+    }
   }
   return null;
 }
@@ -426,10 +429,10 @@ function solveOne(data, { targets, sex, weaponSlots, job }, forced, bodyMult, ne
     const outs = [];
     for (const set of data.armor) {
       if (set.sex !== 'b' && set.sex !== sex) continue;
-      if (set.role && set.role !== 'b' && set.role !== job) continue;
       if (neset && set.series !== 'ネセト') continue;
       for (const [p, name, slots, skills] of set.pieces) {
         if (p !== part || skills[MULT] > 0) continue;
+        if (part !== 0 && set.role && set.role !== 'b' && set.role !== job) continue;   // 頭だけは剣士用・ガンナー用の区別がなく、どちらでも着られる
         const base = toVec(skills);
         for (const g of slotGains(slots)) {
           const mu = part === 1 ? bodyMult : 1;
